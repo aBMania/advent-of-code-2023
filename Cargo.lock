@@ -25,6 +25,7 @@ dependencies = [
  "dhat",
  "grid",
  "itertools",
+ "lazy_static",
  "memoize",
  "nom",
  "num",

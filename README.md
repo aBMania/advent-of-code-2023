@@ -1,6 +1,6 @@
 <img src="./.assets/christmas_ferris.png" width="164">
 
-# 🎄 Advent of Code {year}
+# 🎄 Advent of Code 2023
 
 Solutions for [Advent of Code](https://adventofcode.com/) in [Rust](https://www.rust-lang.org/).
 
@@ -17,7 +17,7 @@ Solutions for [Advent of Code](https://adventofcode.com/) in [Rust](https://www.
 | [Day 4](./src/bin/04.rs) | `436.7µs` | `494.3µs` |
 | [Day 5](./src/bin/05.rs) | `107.3µs` | `168.3µs` |
 | [Day 6](./src/bin/06.rs) | `419.0ns` | `286.0ns` |
-| [Day 7](./src/bin/07.rs) | `7.9ms` | `16.7ms` |
+| [Day 7](./src/bin/07.rs) | `672.6µs` | `737.3µs` |
 | [Day 8](./src/bin/08.rs) | `538.7µs` | `5.4ms` |
 | [Day 9](./src/bin/09.rs) | `213.6µs` | `216.2µs` |
 | [Day 10](./src/bin/10.rs) | `855.3µs` | `2.5ms` |
@@ -25,31 +25,10 @@ Solutions for [Advent of Code](https://adventofcode.com/) in [Rust](https://www.
 | [Day 12](./src/bin/12.rs) | `51.0ns` | `50.0ns` |
 | [Day 13](./src/bin/13.rs) | `608.8µs` | `1.6ms` |
 
-**Total: 49.02ms**
+**Total: 25.83ms**
 <!--- benchmarking table --->
 
 ---
-
-## Template setup
-
-This template supports all major OS (macOS, Linux, Windows).
-
-###  📝 Create your repository
-
-1.  Open [the template repository](https://github.com/fspoettel/advent-of-code-rust) on Github.
-2.  Click [Use this template](https://github.com/fspoettel/advent-of-code-rust/generate) and create your repository.
-3.  Clone your repository to your computer.
-4.  If you are solving a previous year's advent of code, change the `AOC_YEAR` variable in `.cargo/config.toml` to reflect the year you are solving.
-
-### 💻 Setup rust
-
-1.  Install the [Rust toolchain](https://www.rust-lang.org/tools/install).
-2.  (recommended) Install the [rust-analyzer](https://rust-analyzer.github.io/manual.html) extension for your code editor.
-3.  (optional) Install a native debugger. If you are using VS Code, [CodeLLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb) is a good option.
-
----
-
-✨ You can start solving puzzles now! Head to the [Usage section](#usage) to see how to use this template. If you like, you can configure [some optional features](#optional-template-features).
 
 ## Usage
 
@@ -250,7 +229,7 @@ To enable it, complete the following steps:
 
 #### 1. Create a private leaderboard
 
-Go to the leaderboard page of the year you want to track and click _Private Leaderboard_. If you have not created a leaderboard yet, create one by clicking _Create It_. Your leaderboard should be accessible under `https://adventofcode.com/{year}/leaderboard/private/view/{aoc_user_id}`.
+Go to the leaderboard page of the year you want to track and click _Private Leaderboard_. If you have not created a leaderboard yet, create one by clicking _Create It_. Your leaderboard should be accessible under `https://adventofcode.com/2023/leaderboard/private/view/{aoc_user_id}`.
 
 #### 2. Set repository secrets
 
