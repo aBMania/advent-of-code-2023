@@ -103,7 +103,13 @@ fn build_args(command: &str, args: &[String], day: Day) -> Vec<String> {
         cmd_args.push(year.to_string());
     }
 
-    cmd_args.append(&mut vec!["--day".into(), day.to_string(), command.into()]);
+    cmd_args.append(&mut vec![
+        "--session-file".into(),
+        ".session".into(),
+        "--day".into(),
+        day.to_string(),
+        command.into()
+    ]);
 
     cmd_args
 }
