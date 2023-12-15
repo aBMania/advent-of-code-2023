@@ -1,12 +1,22 @@
 use grid::*;
 use std::fmt::{Debug, Display, Formatter};
+use std::hash::{Hash, Hasher};
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
+#[derive(Eq, PartialEq, Clone)]
 #[repr(transparent)]
-pub struct CustomGrid<T>(Grid<T>);
+pub struct CustomGrid<T: Eq + Hash>(Grid<T>);
 
-impl<T> Deref for CustomGrid<T> {
+impl<T: Eq + Hash> Hash for CustomGrid<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        for x in self.0.iter() {
+            x.hash(state)
+        }
+    }
+}
+
+impl<T: Eq + Hash> Deref for CustomGrid<T> {
     type Target = Grid<T>;
 
     fn deref(&self) -> &Self::Target {
@@ -14,13 +24,13 @@ impl<T> Deref for CustomGrid<T> {
     }
 }
 
-impl<T> DerefMut for CustomGrid<T> {
+impl<T: Eq + Hash> DerefMut for CustomGrid<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
-impl<T: Display> Debug for CustomGrid<T> {
+impl<T: Display + Eq + Hash> Debug for CustomGrid<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         for row in 0..self.0.rows() {
             for col in 0..self.0.cols() {
@@ -32,7 +42,7 @@ impl<T: Display> Debug for CustomGrid<T> {
     }
 }
 
-impl<T> CustomGrid<T> {
+impl<T: Eq + Hash> CustomGrid<T> {
     pub fn iter_neighbors(
         &self,
         row: usize,
@@ -162,7 +172,7 @@ impl<T> CustomGrid<T> {
     }
 }
 
-impl<T: Display> CustomGrid<T> {
+impl<T: Display + Eq + Hash> CustomGrid<T> {
     pub fn print(grid: &CustomGrid<T>) {
         for row in 0..grid.0.rows() {
             for col in 0..grid.0.cols() {
@@ -173,7 +183,7 @@ impl<T: Display> CustomGrid<T> {
     }
 }
 
-pub fn input_to_grid<T: FromStr>(input: &str) -> Result<CustomGrid<T>, <T as FromStr>::Err> {
+pub fn input_to_grid<T: FromStr + Eq + Hash>(input: &str) -> Result<CustomGrid<T>, <T as FromStr>::Err> {
     let lines: Vec<&str> = input.lines().map(|line| line.trim()).collect();
     let cols = lines[0].len();
 

@@ -1,13 +1,23 @@
+#![allow(unused_mut)]
+
 use advent_of_code::custom_grid::{input_to_grid, CustomGrid};
 use itertools::Itertools;
 use std::collections::HashMap;
+use memoize::memoize;
 advent_of_code::solution!(14);
 
-fn tilt_up(grid: &mut CustomGrid<char>) {
-    let topmost_obstacles: HashMap<usize, usize> = HashMap::with_capacity(grid.cols());
+#[memoize]
+fn cycle(mut grid: CustomGrid<char>) -> CustomGrid<char> {
+    tilt_up(&mut grid);
+    tilt_left(&mut grid);
+    tilt_down(&mut grid);
+    tilt_right(&mut grid);
+    grid
+}
 
+fn tilt_up(grid: &mut CustomGrid<char>) {
     (0..grid.rows()).cartesian_product(0..grid.cols()).fold(
-        topmost_obstacles,
+        HashMap::with_capacity(grid.cols()),
         |mut topmost_obstacles, (row, col)| {
             let topmost_obstacle = topmost_obstacles.entry(col).or_insert(0);
             let c = grid.get_mut(row, col).unwrap();
@@ -29,6 +39,86 @@ fn tilt_up(grid: &mut CustomGrid<char>) {
     );
 }
 
+fn tilt_down(grid: &mut CustomGrid<char>) {
+    (0..grid.rows()).rev().cartesian_product(0..grid.cols()).fold(
+        HashMap::with_capacity(grid.cols()),
+        |mut bottommost_obstacles, (row, col)| {
+            let bottommost_obstacle = bottommost_obstacles.entry(col).or_insert(grid.rows() - 1);
+            let c = grid.get_mut(row, col).unwrap();
+
+            match c {
+                '#' => {
+                    if row != 0 {
+                        *bottommost_obstacle = row - 1;
+                    }
+                }
+                'O' => {
+                    *c = '.';
+                    *grid.get_mut(*bottommost_obstacle, col).unwrap() = 'O';
+                    if *bottommost_obstacle != 0 {
+                        *bottommost_obstacle -= 1;
+                    }
+                }
+                _ => {}
+            }
+
+            bottommost_obstacles
+        },
+    );
+}
+
+fn tilt_left(grid: &mut CustomGrid<char>) {
+    (0..grid.cols()).cartesian_product(0..grid.rows()).fold(
+        HashMap::with_capacity(grid.rows()),
+        |mut rightmost_obstacles, (col, row)| {
+            let rightmost_obstacle = rightmost_obstacles.entry(row).or_insert(0);
+            let c = grid.get_mut(row, col).unwrap();
+
+            match c {
+                '#' => {
+                    *rightmost_obstacle = col + 1;
+                }
+                'O' => {
+                    *c = '.';
+                    *grid.get_mut(row, *rightmost_obstacle).unwrap() = 'O';
+                    *rightmost_obstacle += 1;
+                }
+                _ => {}
+            }
+
+            rightmost_obstacles
+        },
+    );
+}
+
+fn tilt_right(grid: &mut CustomGrid<char>) {
+    (0..grid.cols()).rev().cartesian_product(0..grid.rows()).fold(
+        HashMap::with_capacity(grid.rows()),
+        |mut rightmost_obstacles, (col, row)| {
+            let rightmost_obstacle = rightmost_obstacles.entry(row).or_insert(grid.cols() - 1);
+            let c = grid.get_mut(row, col).unwrap();
+
+            match c {
+                '#' => {
+                    if col != 0 {
+                        *rightmost_obstacle = col - 1;
+                    }
+                }
+                'O' => {
+                    *c = '.';
+                    *grid.get_mut(row, *rightmost_obstacle).unwrap() = 'O';
+                    if *rightmost_obstacle != 0 {
+                        *rightmost_obstacle -= 1;
+                    }
+                }
+                _ => {}
+            }
+
+            rightmost_obstacles
+        },
+    );
+}
+
 fn damages(grid: &CustomGrid<char>) -> u32 {
     grid.indexed_iter()
         .map(|((row, _), c)| match c {
@@ -39,35 +129,17 @@ fn damages(grid: &CustomGrid<char>) -> u32 {
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let grid: CustomGrid<char> = input_to_grid(input).unwrap();
+    let mut grid: CustomGrid<char> = input_to_grid(input).unwrap();
 
-    let topmost_obstacles: HashMap<usize, usize> = HashMap::with_capacity(grid.cols());
+    tilt_up(&mut grid);
 
-    let (_, damage) = grid.indexed_iter().fold(
-        (topmost_obstacles, 0),
-        |(mut topmost_obstacles, mut damage), ((row, col), c)| {
-            let topmost_obstacle = topmost_obstacles.entry(col).or_insert(0);
-
-            match c {
-                '#' => {
-                    *topmost_obstacle = row + 1;
-                }
-                'O' => {
-                    damage += grid.rows() - *topmost_obstacle;
-                    *topmost_obstacle += 1;
-                }
-                _ => {}
-            }
-
-            (topmost_obstacles, damage)
-        },
-    );
-
-    Some(damage as u32)
+    Some(damages(&grid))
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
+    let input = input.to_string().leak();
     let mut grid: CustomGrid<char> = input_to_grid(input).unwrap();
+
 
     let mut memo = HashMap::new();
     let mut solves = HashMap::new();
@@ -77,14 +149,8 @@ pub fn part_two(input: &str) -> Option<u32> {
 
     let solve = loop {
         i += 1;
-        tilt_up(&mut grid);
-        grid.rotate_right();
-        tilt_up(&mut grid);
-        grid.rotate_right();
-        tilt_up(&mut grid);
-        grid.rotate_right();
-        tilt_up(&mut grid);
-        grid.rotate_right();
+
+        grid = cycle(grid);
 
         solves.insert(i, damages(&grid));
 

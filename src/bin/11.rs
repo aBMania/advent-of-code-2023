@@ -25,7 +25,7 @@ fn parse_input(input: &str, gap: usize) -> Vec<(usize, usize)> {
     let mut current_empty_cols = 0;
 
     for (i, mut col) in grid.iter_cols().enumerate() {
-        if col.all(|&n| n == '.') {
+        if !col.contains(&'#') {
             current_empty_cols += 1;
         }
 
@@ -33,7 +33,7 @@ fn parse_input(input: &str, gap: usize) -> Vec<(usize, usize)> {
     }
 
     grid.indexed_iter()
-        .filter_map(|((row, col), c)| match *c {
+        .filter_map(|((row, col), c)| match c {
             '#' => Some((
                 row + (gap - 1) * empty_rows.get(&row).expect("no empty row entry in map"),
                 col + (gap - 1) * empty_cols.get(&col).expect("no empty col entry in map"),
