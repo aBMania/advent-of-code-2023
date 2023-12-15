@@ -7,9 +7,7 @@ struct SeedMapper {
     gap: i64,
 }
 
-#[derive(Copy, Clone)]
-#[derive(Debug)]
-#[derive(PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 struct Range {
     from: u64,
     // included
@@ -19,10 +17,7 @@ struct Range {
 impl Range {
     fn new(from: u64, to: u64) -> Self {
         assert!(from < to);
-        Self {
-            from,
-            to,
-        }
+        Self { from, to }
     }
     fn intersect(&self, other: &Range) -> bool {
         self.from >= other.from && self.from < other.to
@@ -39,7 +34,6 @@ impl Range {
             })
         }
     }
-
 
     // (intersection, rest)
     fn intersection_remainder(&self, other: &Range) -> (Option<Range>, Vec<Range>) {
@@ -66,48 +60,56 @@ impl Range {
 
 fn parse_mappers(input: &str) -> Vec<Vec<SeedMapper>> {
     let parts = input.split("\n\n");
-    parts.map(|m| {
-        m
-            .lines()
-            .skip(1)
-            .map(|mapper_line| {
-                let mut seed_mapper_parts = mapper_line.split(' ');
-                let to: i64 = seed_mapper_parts.next().unwrap().parse().expect("parse to");
-                let from: i64 = seed_mapper_parts.next().unwrap().parse().expect("parse from");
-                let width: u64 = seed_mapper_parts.next().unwrap().parse().expect("parse width");
-                SeedMapper {
-                    range: Range::new(from as u64, from as u64 + width),
-                    gap: to - from,
-                }
-            }).collect()
-    }).collect()
+    parts
+        .map(|m| {
+            m.lines()
+                .skip(1)
+                .map(|mapper_line| {
+                    let mut seed_mapper_parts = mapper_line.split(' ');
+                    let to: i64 = seed_mapper_parts.next().unwrap().parse().expect("parse to");
+                    let from: i64 = seed_mapper_parts
+                        .next()
+                        .unwrap()
+                        .parse()
+                        .expect("parse from");
+                    let width: u64 = seed_mapper_parts
+                        .next()
+                        .unwrap()
+                        .parse()
+                        .expect("parse width");
+                    SeedMapper {
+                        range: Range::new(from as u64, from as u64 + width),
+                        gap: to - from,
+                    }
+                })
+                .collect()
+        })
+        .collect()
 }
 
 fn parse_seeds_part1(input: &str) -> Vec<Range> {
     let (_, seeds) = input.split_once(": ").expect("parse seed line");
-    seeds.split(' ')
+    seeds
+        .split(' ')
         .map(|s| s.parse::<u64>().expect("parse seed"))
-        .map(|seed| {
-            Range {
-                from: seed,
-                to: seed + 1,
-            }
+        .map(|seed| Range {
+            from: seed,
+            to: seed + 1,
         })
         .collect()
 }
 
 fn parse_seeds_part2(input: &str) -> Vec<Range> {
     let (_, seeds) = input.split_once(": ").expect("parse seed line");
-    seeds.split(' ').map(|s| s.parse().expect("parse seed"))
+    seeds
+        .split(' ')
+        .map(|s| s.parse().expect("parse seed"))
         .collect::<Vec<u64>>()
         .chunks(2)
         .map(|chunk| {
             let from = *chunk.first().unwrap();
             let n = *chunk.get(1).unwrap();
-            Range {
-                from,
-                to: from + n,
-            }
+            Range { from, to: from + n }
         })
         .collect()
 }
@@ -116,22 +118,25 @@ fn solve(seeds: Vec<Range>, mappers: Vec<Vec<SeedMapper>>) -> Option<u64> {
     let min_range = mappers
         .into_iter()
         .fold(seeds, |seeds, seed_mappers| {
-            let (unchanged_seeds, changed_seeds) =
-                seed_mappers
-                    .into_iter()
-                    .fold((seeds, vec![]), |(mut unchanged_seeds, mut changed_seeds), seed_mapper| {
-                        unchanged_seeds = unchanged_seeds.into_iter().flat_map(|seed| {
-                            let (intersection, remainders) = seed.intersection_remainder(&seed_mapper.range);
+            let (unchanged_seeds, changed_seeds) = seed_mappers.into_iter().fold(
+                (seeds, vec![]),
+                |(mut unchanged_seeds, mut changed_seeds), seed_mapper| {
+                    unchanged_seeds = unchanged_seeds
+                        .into_iter()
+                        .flat_map(|seed| {
+                            let (intersection, remainders) =
+                                seed.intersection_remainder(&seed_mapper.range);
                             if let Some(mut intersection) = intersection {
                                 intersection.shift(seed_mapper.gap);
                                 changed_seeds.push(intersection)
                             }
                             remainders
                         })
-                            .collect();
+                        .collect();
 
-                        (unchanged_seeds, changed_seeds)
-                    });
+                    (unchanged_seeds, changed_seeds)
+                },
+            );
             [unchanged_seeds, changed_seeds].concat()
         })
         .into_iter()
@@ -179,10 +184,22 @@ mod tests {
     fn range_intersection() {
         let range = Range::new(10, 15);
 
-        assert_eq!(range.intersection(&Range::new(10, 11)), Some(Range::new(10, 11)));
-        assert_eq!(range.intersection(&Range::new(11, 12)), Some(Range::new(11, 12)));
-        assert_eq!(range.intersection(&Range::new(8, 12)), Some(Range::new(10, 12)));
-        assert_eq!(range.intersection(&Range::new(12, 16)), Some(Range::new(12, 15)));
+        assert_eq!(
+            range.intersection(&Range::new(10, 11)),
+            Some(Range::new(10, 11))
+        );
+        assert_eq!(
+            range.intersection(&Range::new(11, 12)),
+            Some(Range::new(11, 12))
+        );
+        assert_eq!(
+            range.intersection(&Range::new(8, 12)),
+            Some(Range::new(10, 12))
+        );
+        assert_eq!(
+            range.intersection(&Range::new(12, 16)),
+            Some(Range::new(12, 15))
+        );
         assert_eq!(range.intersection(&Range::new(15, 16)), None);
         assert_eq!(range.intersection(&Range::new(9, 10)), None);
         assert_eq!(range.intersection(&Range::new(16, 17)), None);
@@ -193,15 +210,45 @@ mod tests {
     fn range_intersection_remainder() {
         let range = Range::new(10, 15);
 
-        assert_eq!(range.intersection_remainder(&Range::new(10, 11)), (Some(Range::new(10, 11)), vec![Range::new(11, 15)]));
-        assert_eq!(range.intersection_remainder(&Range::new(11, 12)), (Some(Range::new(11, 12)), vec![Range::new(10, 11), Range::new(12, 15)]));
-        assert_eq!(range.intersection_remainder(&Range::new(8, 12)), (Some(Range::new(10, 12)), vec![Range::new(12, 15)]));
-        assert_eq!(range.intersection_remainder(&Range::new(12, 16)), (Some(Range::new(12, 15)), vec![Range::new(10, 12)]));
-        assert_eq!(range.intersection_remainder(&Range::new(15, 16)), (None, vec![Range::new(10, 15)]));
-        assert_eq!(range.intersection_remainder(&Range::new(12, 16)), (Some(Range::new(12, 15)), vec![Range::new(10, 12)]));
-        assert_eq!(range.intersection_remainder(&Range::new(9, 10)), (None, vec![Range::new(10, 15)]));
-        assert_eq!(range.intersection_remainder(&Range::new(9, 10)), (None, vec![Range::new(10, 15)]));
-        assert_eq!(range.intersection_remainder(&Range::new(0, 10)), (None, vec![Range::new(10, 15)]));
+        assert_eq!(
+            range.intersection_remainder(&Range::new(10, 11)),
+            (Some(Range::new(10, 11)), vec![Range::new(11, 15)])
+        );
+        assert_eq!(
+            range.intersection_remainder(&Range::new(11, 12)),
+            (
+                Some(Range::new(11, 12)),
+                vec![Range::new(10, 11), Range::new(12, 15)]
+            )
+        );
+        assert_eq!(
+            range.intersection_remainder(&Range::new(8, 12)),
+            (Some(Range::new(10, 12)), vec![Range::new(12, 15)])
+        );
+        assert_eq!(
+            range.intersection_remainder(&Range::new(12, 16)),
+            (Some(Range::new(12, 15)), vec![Range::new(10, 12)])
+        );
+        assert_eq!(
+            range.intersection_remainder(&Range::new(15, 16)),
+            (None, vec![Range::new(10, 15)])
+        );
+        assert_eq!(
+            range.intersection_remainder(&Range::new(12, 16)),
+            (Some(Range::new(12, 15)), vec![Range::new(10, 12)])
+        );
+        assert_eq!(
+            range.intersection_remainder(&Range::new(9, 10)),
+            (None, vec![Range::new(10, 15)])
+        );
+        assert_eq!(
+            range.intersection_remainder(&Range::new(9, 10)),
+            (None, vec![Range::new(10, 15)])
+        );
+        assert_eq!(
+            range.intersection_remainder(&Range::new(0, 10)),
+            (None, vec![Range::new(10, 15)])
+        );
     }
 
     #[test]

@@ -1,6 +1,7 @@
-use std::collections::HashMap;
+use advent_of_code::custom_grid::{input_to_grid, CustomGrid};
 use itertools::Itertools;
-use advent_of_code::custom_grid::{CustomGrid, input_to_grid};
+use std::collections::HashMap;
+
 advent_of_code::solution!(11);
 
 fn parse_input(input: &str, gap: usize) -> Vec<(usize, usize)> {
@@ -31,18 +32,13 @@ fn parse_input(input: &str, gap: usize) -> Vec<(usize, usize)> {
         empty_cols.insert(i, current_empty_cols);
     }
 
-    grid
-        .indexed_iter()
-        .filter_map(|((row, col), c)| {
-            match *c {
-                '#' => Some(
-                    (
-                        row + (gap - 1) * empty_rows.get(&row).expect("no empty row entry in map"),
-                        col + (gap - 1) * empty_cols.get(&col).expect("no empty col entry in map"),
-                    )
-                ),
-                _ => None
-            }
+    grid.indexed_iter()
+        .filter_map(|((row, col), c)| match *c {
+            '#' => Some((
+                row + (gap - 1) * empty_rows.get(&row).expect("no empty row entry in map"),
+                col + (gap - 1) * empty_cols.get(&col).expect("no empty col entry in map"),
+            )),
+            _ => None,
         })
         .collect()
 }
@@ -54,7 +50,7 @@ fn distance((row, col): (usize, usize), (other_row, other_col): (usize, usize)) 
 pub fn part_one(input: &str) -> Option<u32> {
     Some(
         parse_input(input, 2)
-            .iter()
+            .into_iter()
             .combinations(2)
             .map(|chunk| {
                 let (row, col) = chunk.first().unwrap();
@@ -62,13 +58,12 @@ pub fn part_one(input: &str) -> Option<u32> {
 
                 distance((*row, *col), (*other_row, *other_col)) as u32
             })
-            .sum()
+            .sum(),
     )
 }
 
-
 pub fn part_two(input: &str) -> Option<u64> {
-    let positions = parse_input(input, 1000000);
+    let positions = parse_input(input, 1_000_000);
     Some(
         positions
             .iter()
@@ -79,7 +74,7 @@ pub fn part_two(input: &str) -> Option<u64> {
 
                 distance((*row, *col), (*other_row, *other_col)) as u64
             })
-            .sum()
+            .sum(),
     )
 }
 
@@ -96,7 +91,7 @@ mod tests {
     }
 
     #[test]
-    fn  test_part_one() {
+    fn test_part_one() {
         let result = part_one(&advent_of_code::template::read_file("examples", DAY));
         assert_eq!(result, Some(374));
     }

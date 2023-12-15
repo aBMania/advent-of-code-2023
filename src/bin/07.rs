@@ -1,7 +1,7 @@
-use std::cmp::Ordering;
-use std::collections::HashMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
+use std::cmp::Ordering;
+use std::collections::HashMap;
 
 advent_of_code::solution!(7);
 
@@ -10,7 +10,6 @@ struct Row<'a> {
     bid: u16,
 }
 
-
 fn parse_input(input: &str) -> Vec<Row> {
     input
         .lines()
@@ -18,24 +17,21 @@ fn parse_input(input: &str) -> Vec<Row> {
             let (cards, bid) = line.split_whitespace().collect_tuple().unwrap();
             let bid = bid.parse().unwrap();
 
-            Row {
-                bid,
-                cards,
-            }
+            Row { bid, cards }
         })
         .collect()
 }
 
 /*
-   Hand types:
-   6: Five of a kind
-   5: Four of a kind
-   4: Full house
-   4: Three of a kind
-   2: Two pair
-   1: One pair
-   0: High card
- */
+  Hand types:
+  6: Five of a kind
+  5: Four of a kind
+  4: Full house
+  4: Three of a kind
+  2: Two pair
+  1: One pair
+  0: High card
+*/
 
 fn hand_type(hand: &str) -> u8 {
     let mut card_count: HashMap<char, u8> = HashMap::with_capacity(5);
@@ -49,13 +45,13 @@ fn hand_type(hand: &str) -> u8 {
     let second = cards_iter.next();
 
     match (first, second) {
-        (Some(5), _) => 6, // Five of a kind
-        (Some(4), _) => 5, // Four of a kind
+        (Some(5), _) => 6,       // Five of a kind
+        (Some(4), _) => 5,       // Four of a kind
         (Some(3), Some(2)) => 4, // Full house
-        (Some(3), _) => 3, // Three of a kind
+        (Some(3), _) => 3,       // Three of a kind
         (Some(2), Some(2)) => 2, // Two pair
-        (Some(2), _) => 1, // One pair
-        (_, _) => 0 // High card
+        (Some(2), _) => 1,       // One pair
+        (_, _) => 0,             // High card
     }
 }
 
@@ -78,12 +74,19 @@ lazy_static! {
     ]);
 }
 
-fn compare_hands((hand, hand_type): (&str, &u8), (other_hand, other_hand_type): (&str, &u8)) -> Ordering {
+fn compare_hands(
+    (hand, hand_type): (&str, &u8),
+    (other_hand, other_hand_type): (&str, &u8),
+) -> Ordering {
     match hand_type.cmp(other_hand_type) {
         Ordering::Equal => {
             for i in 0usize..5usize {
-                match CARD_VALUES[&hand.chars().nth(i).unwrap()].cmp(&CARD_VALUES[&other_hand.chars().nth(i).unwrap()]) {
-                    Ordering::Equal => { continue; }
+                match CARD_VALUES[&hand.chars().nth(i).unwrap()]
+                    .cmp(&CARD_VALUES[&other_hand.chars().nth(i).unwrap()])
+                {
+                    Ordering::Equal => {
+                        continue;
+                    }
                     o => {
                         return o;
                     }
@@ -101,12 +104,12 @@ pub fn part_one(input: &str) -> Option<u64> {
         hands
             .iter()
             .map(|row| (row, hand_type(row.cards)))
-            .sorted_by(|(row, hand_type), (other_row, other_hand_type)|
+            .sorted_by(|(row, hand_type), (other_row, other_hand_type)| {
                 compare_hands((row.cards, hand_type), (other_row.cards, other_hand_type))
-            )
+            })
             .enumerate()
             .map(|(i, (row, _))| row.bid as u64 * (i + 1) as u64)
-            .sum()
+            .sum(),
     )
 }
 
@@ -122,17 +125,16 @@ fn hand_type_joker(hand: &str) -> u8 {
     let first = cards_iter.next();
     let second = cards_iter.next();
 
-
     match (first, second, n_joker) {
         (Some(n), _, j) if n + j == 5 => 6, // Five of a kind
-        (None, _, 5) => 6, // Five of a kind, joker only
+        (None, _, 5) => 6,                  // Five of a kind, joker only
         (Some(n), _, j) if n + j == 4 => 5, // Four of a kind
-        (Some(3), Some(2), 0) => 4, // Full house
-        (Some(2), Some(2), 1) => 4, // Full house (including 1 joker)
+        (Some(3), Some(2), 0) => 4,         // Full house
+        (Some(2), Some(2), 1) => 4,         // Full house (including 1 joker)
         (Some(n), _, j) if n + j == 3 => 3, // Three of a kind
-        (Some(2), Some(2), 0) => 2, // Two pairs
+        (Some(2), Some(2), 0) => 2,         // Two pairs
         (Some(n), _, j) if n + j == 2 => 1, // One pair
-        (_, _, _) => 0 // High card
+        (_, _, _) => 0,                     // High card
     }
 }
 
@@ -155,13 +157,19 @@ lazy_static! {
     ]);
 }
 
-fn compare_hands_joker((hand, hand_type): (&str, &u8), (other_hand, other_hand_type): (&str, &u8)) -> Ordering {
+fn compare_hands_joker(
+    (hand, hand_type): (&str, &u8),
+    (other_hand, other_hand_type): (&str, &u8),
+) -> Ordering {
     match hand_type.cmp(other_hand_type) {
         Ordering::Equal => {
             for i in 0usize..5usize {
                 match CARD_VALUES_JOKER[&hand.chars().nth(i).unwrap()]
-                    .cmp(&CARD_VALUES_JOKER[&other_hand.chars().nth(i).unwrap()]) {
-                    Ordering::Equal => { continue; }
+                    .cmp(&CARD_VALUES_JOKER[&other_hand.chars().nth(i).unwrap()])
+                {
+                    Ordering::Equal => {
+                        continue;
+                    }
                     o => {
                         return o;
                     }
@@ -179,15 +187,14 @@ pub fn part_two(input: &str) -> Option<u64> {
         hands
             .iter()
             .map(|row| (row, hand_type_joker(row.cards)))
-            .sorted_by(|(row, hand_type), (other_row, other_hand_type)|
+            .sorted_by(|(row, hand_type), (other_row, other_hand_type)| {
                 compare_hands_joker((row.cards, hand_type), (other_row.cards, other_hand_type))
-            )
+            })
             .enumerate()
             .map(|(i, (row, _))| row.bid as u64 * (i + 1) as u64)
-            .sum()
+            .sum(),
     )
 }
-
 
 #[cfg(test)]
 mod tests {

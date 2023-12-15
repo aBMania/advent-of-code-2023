@@ -1,9 +1,8 @@
+use advent_of_code::custom_grid::{input_to_grid, CustomGrid};
+use itertools::Itertools;
 use std::collections::BTreeMap;
 use std::iter::once;
-use itertools::Itertools;
-use advent_of_code::custom_grid::{CustomGrid, input_to_grid};
 advent_of_code::solution!(3);
-
 
 pub fn part_one(input: &str) -> Option<u32> {
     let grid: CustomGrid<char> = input_to_grid::<char>(input).unwrap();
@@ -14,22 +13,20 @@ pub fn part_one(input: &str) -> Option<u32> {
     while let Some(((row, col), value)) = iterator.next() {
         match *value {
             _ if value.is_ascii_digit() => {}
-            _ => continue
+            _ => continue,
         }
 
-        let group: Vec<_> =
-            once(((row, col), value)).chain(
-                iterator
-                    .peeking_take_while(|(_, value)| value.is_ascii_digit())
-            )
-                .collect();
+        let group: Vec<_> = once(((row, col), value))
+            .chain(iterator.peeking_take_while(|(_, value)| value.is_ascii_digit()))
+            .collect();
 
         let symbol = group
             .iter()
             .filter_map(|&((row, col), _)| {
-                grid
-                    .iter_diagonal_neighbors(row, col)
-                    .filter(|(_, &neighbor_value)| neighbor_value != '.' && !neighbor_value.is_ascii_digit())
+                grid.iter_diagonal_neighbors(row, col)
+                    .filter(|(_, &neighbor_value)| {
+                        neighbor_value != '.' && !neighbor_value.is_ascii_digit()
+                    })
                     .map(|(pos, _)| pos)
                     .next()
             })
@@ -47,10 +44,8 @@ pub fn part_one(input: &str) -> Option<u32> {
         }
     }
 
-    Some(
-        sum)
+    Some(sum)
 }
-
 
 pub fn part_two(input: &str) -> Option<u32> {
     let grid: CustomGrid<char> = input_to_grid::<char>(input).unwrap();
@@ -61,21 +56,17 @@ pub fn part_two(input: &str) -> Option<u32> {
     while let Some(((row, col), value)) = iterator.next() {
         match *value {
             _ if value.is_ascii_digit() => {}
-            _ => continue
+            _ => continue,
         }
 
-        let group: Vec<_> =
-            once(((row, col), value)).chain(
-                iterator
-                    .peeking_take_while(|(_, value)| value.is_ascii_digit())
-            )
-                .collect();
+        let group: Vec<_> = once(((row, col), value))
+            .chain(iterator.peeking_take_while(|(_, value)| value.is_ascii_digit()))
+            .collect();
 
         let gear = group
             .iter()
             .filter_map(|&((row, col), _)| {
-                grid
-                    .iter_diagonal_neighbors(row, col)
+                grid.iter_diagonal_neighbors(row, col)
                     .filter(|(_, &neighbor_value)| neighbor_value == '*')
                     .map(|(pos, _)| pos)
                     .next()
@@ -97,13 +88,11 @@ pub fn part_two(input: &str) -> Option<u32> {
     Some(
         gears
             .iter()
-            .filter_map(|(_, sums)| {
-                match sums.len() {
-                    2 => Some(sums.first().unwrap() * sums.get(1).unwrap()),
-                    _ => None
-                }
+            .filter_map(|(_, sums)| match sums.len() {
+                2 => Some(sums.first().unwrap() * sums.get(1).unwrap()),
+                _ => None,
             })
-            .sum()
+            .sum(),
     )
 }
 

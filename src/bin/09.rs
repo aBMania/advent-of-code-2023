@@ -4,12 +4,11 @@ advent_of_code::solution!(9);
 pub fn parse_input(input: &str) -> Vec<Vec<i32>> {
     input
         .lines()
-        .map(|line|
-            line
-                .split_whitespace()
+        .map(|line| {
+            line.split_whitespace()
                 .map(|number| number.parse().unwrap())
                 .collect()
-        )
+        })
         .collect()
 }
 
@@ -24,7 +23,6 @@ fn serie_gaps(serie: &[i32]) -> Vec<i32> {
 }
 
 fn find_next(serie: &Vec<i32>) -> i32 {
-
     #[tailcall]
     fn find_next_inner(serie: &Vec<i32>) -> i32 {
         let gaps = serie_gaps(serie);
@@ -53,27 +51,13 @@ fn find_previous(serie: &Vec<i32>) -> i32 {
 pub fn part_one(input: &str) -> Option<i32> {
     let series = parse_input(input);
 
-    Some(
-        series
-            .into_iter()
-            .map(|serie| {
-                find_next(&serie)
-            })
-            .sum()
-    )
+    Some(series.into_iter().map(|serie| find_next(&serie)).sum())
 }
 
 pub fn part_two(input: &str) -> Option<i32> {
     let series = parse_input(input);
 
-    Some(
-        series
-            .into_iter()
-            .map(|serie| {
-                find_previous(&serie)
-            })
-            .sum()
-    )
+    Some(series.into_iter().map(|serie| find_previous(&serie)).sum())
 }
 
 #[cfg(test)]

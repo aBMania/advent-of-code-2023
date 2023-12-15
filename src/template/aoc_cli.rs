@@ -108,7 +108,7 @@ fn build_args(command: &str, args: &[String], day: Day) -> Vec<String> {
         ".session".into(),
         "--day".into(),
         day.to_string(),
-        command.into()
+        command.into(),
     ]);
 
     cmd_args

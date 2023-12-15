@@ -1,6 +1,5 @@
 advent_of_code::solution!(2);
 
-
 struct Draw {
     red: u32,
     green: u32,
@@ -24,16 +23,10 @@ fn parse_draw(draw_str: &str) -> Draw {
         let color: &str = parts.next().unwrap();
 
         match color {
-            "red" => {
-                draw.red = n
-            }
-            "blue" => {
-                draw.blue = n
-            }
-            "green" => {
-                draw.green = n
-            }
-            _ => panic!()
+            "red" => draw.red = n,
+            "blue" => draw.blue = n,
+            "green" => draw.green = n,
+            _ => panic!(),
         }
     }
 
@@ -41,22 +34,23 @@ fn parse_draw(draw_str: &str) -> Draw {
 }
 
 fn parse_draws(draws_str: &str) -> Vec<Draw> {
-    draws_str.split(';')
-            .map(parse_draw)
-        .collect()
+    draws_str.split(';').map(parse_draw).collect()
 }
 
 fn parse_game(game_str: &str) -> Game {
     let mut parts = game_str.splitn(2, ':');
-    let id: u32 = parts.next().unwrap().split(' ').last().unwrap().parse().unwrap();
+    let id: u32 = parts
+        .next()
+        .unwrap()
+        .split(' ')
+        .last()
+        .unwrap()
+        .parse()
+        .unwrap();
     let draws = parse_draws(parts.next().unwrap());
 
-    Game {
-        id,
-        draws,
-    }
+    Game { id, draws }
 }
-
 
 pub fn part_one(input: &str) -> Option<u32> {
     Some(
@@ -64,17 +58,14 @@ pub fn part_one(input: &str) -> Option<u32> {
             .lines()
             .map(parse_game)
             .filter(|game: &Game| {
-                game.draws.iter().all(|draw: &Draw| {
-                    draw.blue <= 14
-                        && draw.green <= 13
-                        && draw.red <= 12
-                })
+                game.draws
+                    .iter()
+                    .all(|draw: &Draw| draw.blue <= 14 && draw.green <= 13 && draw.red <= 12)
             })
             .map(|game: Game| game.id)
-            .sum()
+            .sum(),
     )
 }
-
 
 pub fn part_two(input: &str) -> Option<u32> {
     Some(
@@ -82,13 +73,28 @@ pub fn part_two(input: &str) -> Option<u32> {
             .lines()
             .map(parse_game)
             .map(|game: Game| {
-                let max_red = game.draws.iter().map(|draw: &Draw| draw.red).max().unwrap_or(0);
-                let max_blue = game.draws.iter().map(|draw: &Draw| draw.blue).max().unwrap_or(0);
-                let max_green = game.draws.iter().map(|draw: &Draw| draw.green).max().unwrap_or(0);
+                let max_red = game
+                    .draws
+                    .iter()
+                    .map(|draw: &Draw| draw.red)
+                    .max()
+                    .unwrap_or(0);
+                let max_blue = game
+                    .draws
+                    .iter()
+                    .map(|draw: &Draw| draw.blue)
+                    .max()
+                    .unwrap_or(0);
+                let max_green = game
+                    .draws
+                    .iter()
+                    .map(|draw: &Draw| draw.green)
+                    .max()
+                    .unwrap_or(0);
 
                 max_blue * max_red * max_green
             })
-            .sum()
+            .sum(),
     )
 }
 #[cfg(test)]

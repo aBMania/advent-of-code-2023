@@ -7,14 +7,23 @@ struct Race {
 
 fn parse_input_1(input: &str) -> Vec<Race> {
     let mut lines = input.lines();
-    let times: Vec<_> = lines.next().expect("times").split_ascii_whitespace().filter_map(|s| s.parse::<u64>().ok()).collect();
-    let distances: Vec<_> = lines.next().expect("distances").split_ascii_whitespace().filter_map(|s| s.parse::<u64>().ok()).collect();
+    let times: Vec<_> = lines
+        .next()
+        .expect("times")
+        .split_ascii_whitespace()
+        .filter_map(|s| s.parse::<u64>().ok())
+        .collect();
+    let distances: Vec<_> = lines
+        .next()
+        .expect("distances")
+        .split_ascii_whitespace()
+        .filter_map(|s| s.parse::<u64>().ok())
+        .collect();
 
-    times.into_iter().zip(distances)
-        .map(|(time, distance)| Race {
-            time,
-            distance,
-        })
+    times
+        .into_iter()
+        .zip(distances)
+        .map(|(time, distance)| Race { time, distance })
         .collect()
 }
 
@@ -37,21 +46,30 @@ pub fn part_one(input: &str) -> Option<u64> {
 
 fn parse_input_2(input: &str) -> Race {
     let mut lines = input.lines();
-    let time = lines.next().expect("time").chars().filter(|c| c.is_ascii_digit()).collect::<String>().parse::<u64>().expect("time parsing");
-    let distance = lines.next().expect("distance").chars().filter(|c| c.is_ascii_digit()).collect::<String>().parse::<u64>().expect("distance parsing");
+    let time = lines
+        .next()
+        .expect("time")
+        .chars()
+        .filter(|c| c.is_ascii_digit())
+        .collect::<String>()
+        .parse::<u64>()
+        .expect("time parsing");
+    let distance = lines
+        .next()
+        .expect("distance")
+        .chars()
+        .filter(|c| c.is_ascii_digit())
+        .collect::<String>()
+        .parse::<u64>()
+        .expect("distance parsing");
 
-    Race {
-        time,
-        distance,
-    }
+    Race { time, distance }
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
     let race = parse_input_2(input);
 
-    Some(
-        solve_race(&race)
-    )
+    Some(solve_race(&race))
 }
 
 #[cfg(test)]

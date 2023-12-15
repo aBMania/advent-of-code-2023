@@ -1,13 +1,14 @@
-use std::collections::HashMap;
+use advent_of_code::custom_grid::{input_to_grid, CustomGrid};
 use itertools::Itertools;
-use advent_of_code::custom_grid::{CustomGrid, input_to_grid};
+use std::collections::HashMap;
 advent_of_code::solution!(14);
 
 fn tilt_up(grid: &mut CustomGrid<char>) {
     let topmost_obstacles: HashMap<usize, usize> = HashMap::with_capacity(grid.cols());
 
-    (0..grid.rows()).cartesian_product(0..grid.cols())
-        .fold(topmost_obstacles, |mut topmost_obstacles, (row, col)| {
+    (0..grid.rows()).cartesian_product(0..grid.cols()).fold(
+        topmost_obstacles,
+        |mut topmost_obstacles, (row, col)| {
             let topmost_obstacle = topmost_obstacles.entry(col).or_insert(0);
             let c = grid.get_mut(row, col).unwrap();
 
@@ -24,16 +25,17 @@ fn tilt_up(grid: &mut CustomGrid<char>) {
             }
 
             topmost_obstacles
-        });
+        },
+    );
 }
 
 fn damages(grid: &CustomGrid<char>) -> u32 {
-    grid.indexed_iter().map(|((row, _), c)| {
-        match c {
+    grid.indexed_iter()
+        .map(|((row, _), c)| match c {
             'O' => (grid.rows() - row) as u32,
-            _ => 0
-        }
-    }).sum()
+            _ => 0,
+        })
+        .sum()
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
@@ -41,9 +43,9 @@ pub fn part_one(input: &str) -> Option<u32> {
 
     let topmost_obstacles: HashMap<usize, usize> = HashMap::with_capacity(grid.cols());
 
-    let (_, damage) = grid
-        .indexed_iter()
-        .fold((topmost_obstacles, 0), |(mut topmost_obstacles, mut damage), ((row, col), c)| {
+    let (_, damage) = grid.indexed_iter().fold(
+        (topmost_obstacles, 0),
+        |(mut topmost_obstacles, mut damage), ((row, col), c)| {
             let topmost_obstacle = topmost_obstacles.entry(col).or_insert(0);
 
             match c {
@@ -58,7 +60,8 @@ pub fn part_one(input: &str) -> Option<u32> {
             }
 
             (topmost_obstacles, damage)
-        });
+        },
+    );
 
     Some(damage as u32)
 }
@@ -99,7 +102,6 @@ pub fn part_two(input: &str) -> Option<u32> {
                 bound = Some(tmp);
             }
         }
-
 
         if let Some(bound) = bound {
             if let Some(&solve) = solves.get(&bound) {

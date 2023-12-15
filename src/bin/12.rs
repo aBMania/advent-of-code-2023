@@ -13,8 +13,13 @@ fn parse_input(input: &str) -> Vec<Row> {
     input
         .lines()
         .map(|line| {
-            let [pattern, consecutives] = line.split_whitespace().collect::<Vec<_>>()[0..2] else { panic!() };
-            let consecutives: Vec<_> = consecutives.split(',').map(|i| i.parse().unwrap()).collect();
+            let [pattern, consecutives] = line.split_whitespace().collect::<Vec<_>>()[0..2] else {
+                panic!()
+            };
+            let consecutives: Vec<_> = consecutives
+                .split(',')
+                .map(|i| i.parse().unwrap())
+                .collect();
             Row {
                 pattern,
                 consecutives,
@@ -56,7 +61,7 @@ fn solve_row(row: Row<'static>) -> u64 {
 
     let left_space = match last_dot_pos {
         None => row.pattern.len(),
-        Some(last_dot_pos) => row.pattern.len() - last_dot_pos - 1
+        Some(last_dot_pos) => row.pattern.len() - last_dot_pos - 1,
     };
 
     if left_space < consecutive {
@@ -74,7 +79,6 @@ fn solve_row(row: Row<'static>) -> u64 {
                 } else {
                     let mut consecutive_with_popped = row.consecutives.clone();
                     consecutive_with_popped.push(consecutive as u8);
-                    
 
                     // println!("{row_clone:?}");
                     // println!("return {sub_solve} (no solution, went to subsolve for {:?})", &row.pattern[..last_dot_pos]);
@@ -112,8 +116,6 @@ fn solve_row(row: Row<'static>) -> u64 {
             // println!("return {sub_case_replace_by_dot_solve} + {sub_case_replace_by_hashtag_solve} (dot + hashtag)");
             sub_case_replace_by_dot_solve + sub_case_replace_by_hashtag_solve
         } else {
-            
-
             // println!("{row_clone:?}");
             // println!("return sub_case_replace_by_hashtag_solve (hashtag)");
 
@@ -141,16 +143,14 @@ fn solve_row(row: Row<'static>) -> u64 {
         }
     }
 
-
     for i in start_looking..end_looking {
         let before = match i {
             0 => '.',
-            i => row.pattern.chars().nth(i - 1).unwrap()
+            i => row.pattern.chars().nth(i - 1).unwrap(),
         };
         let after = &row.pattern[i + consecutive..];
         // println!("{i} before: {before} after: {after}");
-        if (before == '?' || before == '.') &&
-            after.chars().all(|c| c.eq(&'?')) {
+        if (before == '?' || before == '.') && after.chars().all(|c| c.eq(&'?')) {
             let sub_row = match i {
                 0 => Row {
                     consecutives: row.consecutives.clone(),
@@ -159,7 +159,7 @@ fn solve_row(row: Row<'static>) -> u64 {
                 i => Row {
                     consecutives: row.consecutives.clone(),
                     pattern: &row.pattern[..i - 1],
-                }
+                },
             };
 
             total += solve_row(sub_row)
@@ -172,10 +172,8 @@ fn solve_row(row: Row<'static>) -> u64 {
 }
 
 fn solve(rows: Vec<Row<'static>>) -> u64 {
-    rows
-        .par_iter()
+    rows.par_iter()
         .map(|row| {
-            
             // println!("{:?} {:?} {}", row.pattern, row.consecutives, solve);
             solve_row(row.clone())
         })
@@ -214,102 +212,282 @@ mod tests {
     use super::*;
     #[test]
     fn test_solve_row_trivial() {
-        assert_eq!(solve_row(Row {
-            pattern: "#",
-            consecutives: vec![1],
-        }), 1);
-        assert_eq!(solve_row(Row {
-            pattern: "?",
-            consecutives: vec![1],
-        }), 1);
-        assert_eq!(solve_row(Row {
-            pattern: ".",
-            consecutives: vec![1],
-        }), 0);
-        assert_eq!(solve_row(Row {
-            pattern: ".#",
-            consecutives: vec![1],
-        }), 1);
-        assert_eq!(solve_row(Row {
-            pattern: "..##",
-            consecutives: vec![2],
-        }), 1);
-        assert_eq!(solve_row(Row {
-            pattern: "###.",
-            consecutives: vec![3],
-        }), 1);
-        assert_eq!(solve_row(Row {
-            pattern: "?.?.?",
-            consecutives: vec![1],
-        }), 3);
+        assert_eq!(
+            solve_row(Row {
+                pattern: "#",
+                consecutives: vec![1],
+            }),
+            1
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "?",
+                consecutives: vec![1],
+            }),
+            1
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: ".",
+                consecutives: vec![1],
+            }),
+            0
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: ".#",
+                consecutives: vec![1],
+            }),
+            1
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "..##",
+                consecutives: vec![2],
+            }),
+            1
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "###.",
+                consecutives: vec![3],
+            }),
+            1
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "?.?.?",
+                consecutives: vec![1],
+            }),
+            3
+        );
     }
 
     #[test]
     fn test_solve_example_individual() {
-        assert_eq!(solve_row(Row {
-            pattern: "..???",
-            consecutives: vec![1, 1],
-        }), 1);
+        assert_eq!(
+            solve_row(Row {
+                pattern: "..???",
+                consecutives: vec![1, 1],
+            }),
+            1
+        );
 
-        assert_eq!(solve_row(Row {
-            pattern: ".??..??...?##.",
-            consecutives: vec![1, 1, 3],
-        }), 4);
+        assert_eq!(
+            solve_row(Row {
+                pattern: ".??..??...?##.",
+                consecutives: vec![1, 1, 3],
+            }),
+            4
+        );
 
-        assert_eq!(solve_row(Row {
-            pattern: "?#?#?#?#?#?#?#?",
-            consecutives: vec![1, 3, 1, 6],
-        }), 1);
+        assert_eq!(
+            solve_row(Row {
+                pattern: "?#?#?#?#?#?#?#?",
+                consecutives: vec![1, 3, 1, 6],
+            }),
+            1
+        );
 
-        assert_eq!(solve_row(Row {
-            pattern: "????.#...#...",
-            consecutives: vec![4, 1, 1],
-        }), 1);
+        assert_eq!(
+            solve_row(Row {
+                pattern: "????.#...#...",
+                consecutives: vec![4, 1, 1],
+            }),
+            1
+        );
 
-        assert_eq!(solve_row(Row {
-            pattern: "????.######..#####.",
-            consecutives: vec![1, 6, 5],
-        }), 4);
+        assert_eq!(
+            solve_row(Row {
+                pattern: "????.######..#####.",
+                consecutives: vec![1, 6, 5],
+            }),
+            4
+        );
 
-        assert_eq!(solve_row(Row {
-            pattern: "?###????????",
-            consecutives: vec![3, 2, 1],
-        }), 10);
+        assert_eq!(
+            solve_row(Row {
+                pattern: "?###????????",
+                consecutives: vec![3, 2, 1],
+            }),
+            10
+        );
     }
 
     #[test]
     fn test_solve_part_1_individual() {
-        assert_eq!(solve_row(Row { pattern: "##????????#?#??????", consecutives: vec![4, 1, 8, 2] }), 4);
-        assert_eq!(solve_row(Row { pattern: "?.#??????.#????#??", consecutives: vec![1, 1, 1, 1, 1, 7] }), 1);
-        assert_eq!(solve_row(Row { pattern: ".#??.??.????###?????", consecutives: vec![1, 1, 2, 8, 3] }), 1);
-        assert_eq!(solve_row(Row { pattern: "??.???#????", consecutives: vec![1, 4, 1] }), 13);
-        assert_eq!(solve_row(Row { pattern: "?????.??????##.", consecutives: vec![2, 3, 3] }), 8);
-        assert_eq!(solve_row(Row { pattern: ".??#??.??#", consecutives: vec![3, 2] }), 3);
-        assert_eq!(solve_row(Row { pattern: "?.#?##??#.?#?????", consecutives: vec![1, 5, 1, 2, 3] }), 3);
-        assert_eq!(solve_row(Row { pattern: "?.###??.??#??????", consecutives: vec![4, 8] }), 2);
-        assert_eq!(solve_row(Row { pattern: "?#?????#???", consecutives: vec![2, 1, 1] }), 9);
-        assert_eq!(solve_row(Row { pattern: "???????..??#?.", consecutives: vec![3, 1] }), 5);
-        assert_eq!(solve_row(Row { pattern: "??#??###.????#??.???", consecutives: vec![1, 6, 2, 3, 3] }), 3);
-        assert_eq!(solve_row(Row { pattern: "???????#?????#..??", consecutives: vec![5, 2] }), 4);
-        assert_eq!(solve_row(Row { pattern: "....#?##????.??#??", consecutives: vec![4, 1] }), 1);
-        assert_eq!(solve_row(Row { pattern: "?#??.?.?#?????", consecutives: vec![2, 1, 4] }), 8);
-        assert_eq!(solve_row(Row { pattern: "?#?##????#??.#?#", consecutives: vec![5, 4, 1, 1] }), 5);
-        assert_eq!(solve_row(Row { pattern: "..?.????#??????????", consecutives: vec![1, 1, 1, 1, 1, 4] }), 26);
-        assert_eq!(solve_row(Row { pattern: "?.????#????", consecutives: vec![4, 2] }), 3);
-        assert_eq!(solve_row(Row { pattern: "??.#???.?????", consecutives: vec![1, 3, 1, 1] }), 12);
-        assert_eq!(solve_row(Row { pattern: ".?###???????.?##", consecutives: vec![4, 2, 3] }), 9);
-        assert_eq!(solve_row(Row { pattern: "#??.?##????#?????", consecutives: vec![3, 8, 2] }), 5);
-        assert_eq!(solve_row(Row { pattern: "?#.???.?#?", consecutives: vec![2, 1, 2] }), 6);
-        assert_eq!(solve_row(Row { pattern: "?#???.#????.??", consecutives: vec![4, 2, 1, 2] }), 4);
-        assert_eq!(solve_row(Row { pattern: ".???.??.#?????#?#", consecutives: vec![1, 1, 4, 1, 1] }), 7);
+        assert_eq!(
+            solve_row(Row {
+                pattern: "##????????#?#??????",
+                consecutives: vec![4, 1, 8, 2]
+            }),
+            4
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "?.#??????.#????#??",
+                consecutives: vec![1, 1, 1, 1, 1, 7]
+            }),
+            1
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: ".#??.??.????###?????",
+                consecutives: vec![1, 1, 2, 8, 3]
+            }),
+            1
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "??.???#????",
+                consecutives: vec![1, 4, 1]
+            }),
+            13
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "?????.??????##.",
+                consecutives: vec![2, 3, 3]
+            }),
+            8
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: ".??#??.??#",
+                consecutives: vec![3, 2]
+            }),
+            3
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "?.#?##??#.?#?????",
+                consecutives: vec![1, 5, 1, 2, 3]
+            }),
+            3
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "?.###??.??#??????",
+                consecutives: vec![4, 8]
+            }),
+            2
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "?#?????#???",
+                consecutives: vec![2, 1, 1]
+            }),
+            9
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "???????..??#?.",
+                consecutives: vec![3, 1]
+            }),
+            5
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "??#??###.????#??.???",
+                consecutives: vec![1, 6, 2, 3, 3]
+            }),
+            3
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "???????#?????#..??",
+                consecutives: vec![5, 2]
+            }),
+            4
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "....#?##????.??#??",
+                consecutives: vec![4, 1]
+            }),
+            1
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "?#??.?.?#?????",
+                consecutives: vec![2, 1, 4]
+            }),
+            8
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "?#?##????#??.#?#",
+                consecutives: vec![5, 4, 1, 1]
+            }),
+            5
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "..?.????#??????????",
+                consecutives: vec![1, 1, 1, 1, 1, 4]
+            }),
+            26
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "?.????#????",
+                consecutives: vec![4, 2]
+            }),
+            3
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "??.#???.?????",
+                consecutives: vec![1, 3, 1, 1]
+            }),
+            12
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: ".?###???????.?##",
+                consecutives: vec![4, 2, 3]
+            }),
+            9
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "#??.?##????#?????",
+                consecutives: vec![3, 8, 2]
+            }),
+            5
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "?#.???.?#?",
+                consecutives: vec![2, 1, 2]
+            }),
+            6
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: "?#???.#????.??",
+                consecutives: vec![4, 2, 1, 2]
+            }),
+            4
+        );
+        assert_eq!(
+            solve_row(Row {
+                pattern: ".???.??.#?????#?#",
+                consecutives: vec![1, 1, 4, 1, 1]
+            }),
+            7
+        );
     }
 
     #[test]
     fn test_solve_part_1_cases() {
-        assert_eq!(solve_row(Row {
-            pattern: "???.",
-            consecutives: vec![1, 1],
-        }), 1);
+        assert_eq!(
+            solve_row(Row {
+                pattern: "???.",
+                consecutives: vec![1, 1],
+            }),
+            1
+        );
     }
 
     #[test]

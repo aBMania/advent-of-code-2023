@@ -1,7 +1,7 @@
+use grid::*;
 use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
-use grid::*;
 
 #[repr(transparent)]
 pub struct CustomGrid<T>(Grid<T>);
@@ -33,31 +33,54 @@ impl<T: Display> Debug for CustomGrid<T> {
 }
 
 impl<T> CustomGrid<T> {
-    pub fn iter_neighbors(&self, row: usize, col: usize) -> impl Iterator<Item=((usize, usize), &T)> {
+    pub fn iter_neighbors(
+        &self,
+        row: usize,
+        col: usize,
+    ) -> impl Iterator<Item = ((usize, usize), &T)> {
         [(0, -1), (0, 1), (1, 0), (-1, 0)]
             .iter()
-            .map(move |(col_offset, row_offset)| ((col as isize + col_offset), (row as isize + row_offset)))
+            .map(move |(col_offset, row_offset)| {
+                ((col as isize + col_offset), (row as isize + row_offset))
+            })
             .filter_map(|(col, row)| {
                 if col.is_negative() || row.is_negative() {
                     None
                 } else {
-                    self.0.get(row as usize, col as usize)
+                    self.0
+                        .get(row as usize, col as usize)
                         .map(|val| ((row as usize, col as usize), val))
                 }
             })
     }
-    pub fn iter_diagonal_neighbors(&self, row: usize, col: usize) -> impl Iterator<Item=((usize, usize), &T)> {
-        [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
-            .iter()
-            .map(move |(col_offset, row_offset)| ((col as isize + col_offset), (row as isize + row_offset)))
-            .filter_map(|(col, row)| {
-                if col.is_negative() || row.is_negative() {
-                    None
-                } else {
-                    self.0.get(row as usize, col as usize)
-                        .map(|val| ((row as usize, col as usize), val))
-                }
-            })
+    pub fn iter_diagonal_neighbors(
+        &self,
+        row: usize,
+        col: usize,
+    ) -> impl Iterator<Item = ((usize, usize), &T)> {
+        [
+            (-1, -1),
+            (-1, 0),
+            (-1, 1),
+            (0, -1),
+            (0, 1),
+            (1, -1),
+            (1, 0),
+            (1, 1),
+        ]
+        .iter()
+        .map(move |(col_offset, row_offset)| {
+            ((col as isize + col_offset), (row as isize + row_offset))
+        })
+        .filter_map(|(col, row)| {
+            if col.is_negative() || row.is_negative() {
+                None
+            } else {
+                self.0
+                    .get(row as usize, col as usize)
+                    .map(|val| ((row as usize, col as usize), val))
+            }
+        })
     }
 
     pub fn right(&self, row: usize, col: usize) -> Option<&T> {
@@ -81,7 +104,6 @@ impl<T> CustomGrid<T> {
             self.0.get(row, col - 1).map(|val| ((row, col - 1), val))
         }
     }
-
 
     pub fn up(&self, row: usize, col: usize) -> Option<&T> {
         if row == 0 {
@@ -108,14 +130,18 @@ impl<T> CustomGrid<T> {
     }
 
     pub fn right_mut(&mut self, row: usize, col: usize) -> Option<((usize, usize), &mut T)> {
-        self.0.get_mut(row, col + 1).map(|val| ((row, col + 1), val))
+        self.0
+            .get_mut(row, col + 1)
+            .map(|val| ((row, col + 1), val))
     }
 
     pub fn left_mut(&mut self, row: usize, col: usize) -> Option<((usize, usize), &mut T)> {
         if col == 0 {
             None
         } else {
-            self.0.get_mut(row, col - 1).map(|val| ((row, col - 1), val))
+            self.0
+                .get_mut(row, col - 1)
+                .map(|val| ((row, col - 1), val))
         }
     }
 
@@ -123,12 +149,16 @@ impl<T> CustomGrid<T> {
         if row == 0 {
             None
         } else {
-            self.0.get_mut(row - 1, col).map(|val| ((row - 1, col), val))
+            self.0
+                .get_mut(row - 1, col)
+                .map(|val| ((row - 1, col), val))
         }
     }
 
     pub fn down_mut(&mut self, row: usize, col: usize) -> Option<((usize, usize), &mut T)> {
-        self.0.get_mut(row + 1, col).map(|val| ((row + 1, col), val))
+        self.0
+            .get_mut(row + 1, col)
+            .map(|val| ((row + 1, col), val))
     }
 }
 
@@ -142,7 +172,6 @@ impl<T: Display> CustomGrid<T> {
         }
     }
 }
-
 
 pub fn input_to_grid<T: FromStr>(input: &str) -> Result<CustomGrid<T>, <T as FromStr>::Err> {
     let lines: Vec<&str> = input.lines().map(|line| line.trim()).collect();

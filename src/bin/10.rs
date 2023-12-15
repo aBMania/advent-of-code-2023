@@ -1,5 +1,5 @@
+use advent_of_code::custom_grid::{input_to_grid, CustomGrid};
 use std::collections::HashMap;
-use advent_of_code::custom_grid::{CustomGrid, input_to_grid};
 advent_of_code::solution!(10);
 
 #[derive(Clone, Copy, PartialEq)]
@@ -36,15 +36,14 @@ fn step(
         Direction::Up => grid.up_indexed(next_row, next_col).unwrap(),
         Direction::Down => grid.down_indexed(next_row, next_col).unwrap(),
         Direction::Right => grid.right_indexed(next_row, next_col).unwrap(),
-        Direction::Left => grid.left_indexed(next_row, next_col).unwrap()
+        Direction::Left => grid.left_indexed(next_row, next_col).unwrap(),
     };
 
     (next_row, next_col, direction)
 }
 
 fn start_point(grid: &CustomGrid<char>) -> (usize, usize) {
-    grid
-        .indexed_iter()
+    grid.indexed_iter()
         .find(|(_, &c)| c == 'S')
         .map(|((start_row, start_col), _)| (start_row, start_col))
         .expect("no S in grid")
@@ -61,12 +60,16 @@ fn replace_with_box_char(grid: &mut CustomGrid<char>) {
             'L' => *c = '└',
             '.' => *c = '•',
             'S' => {}
-            _ => panic!("invalid char")
+            _ => panic!("invalid char"),
         }
     }
 }
 
-fn replace_starting_point(grid: &mut CustomGrid<char>, start_row: usize, start_col: usize) -> Direction {
+fn replace_starting_point(
+    grid: &mut CustomGrid<char>,
+    start_row: usize,
+    start_col: usize,
+) -> Direction {
     // Replace starting point
     match (
         grid.left(start_row, start_col),
@@ -98,7 +101,7 @@ fn replace_starting_point(grid: &mut CustomGrid<char>, start_row: usize, start_c
             *grid.get_mut(start_row, start_col).unwrap() = '┌';
             Direction::Up
         }
-        _ => panic!("invalid start")
+        _ => panic!("invalid start"),
     }
 }
 
@@ -137,13 +140,12 @@ fn count_inside_space(grid: &CustomGrid<char>) -> u32 {
                 (State::TopCorner(true), '┘') => State::Inside,
                 (State::TopCorner(false), '┐') => State::Inside,
                 (State::TopCorner(false), '┘') => State::Outside,
-                (state, _) => state
+                (state, _) => state,
             };
         }
-    };
+    }
     count
 }
-
 
 pub fn part_one(input: &str) -> Option<u32> {
     let mut grid: CustomGrid<char> = input_to_grid(input).unwrap();
@@ -176,9 +178,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     replace_with_box_char(&mut grid);
     let start_direction = replace_starting_point(&mut grid, start_row, start_col);
 
-    let mut path = HashMap::from([
-        ((start_row, start_col), true)
-    ]);
+    let mut path = HashMap::from([((start_row, start_col), true)]);
     let (mut next_row, mut next_col, mut direction) = (start_row, start_col, start_direction);
 
     loop {
@@ -199,11 +199,8 @@ pub fn part_two(input: &str) -> Option<u32> {
         }
     }
 
-    Some(
-        count_inside_space(&grid)
-    )
+    Some(count_inside_space(&grid))
 }
-
 
 #[cfg(test)]
 mod tests {
