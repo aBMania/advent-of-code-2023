@@ -67,7 +67,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mut grid: CustomGrid<char> = input_to_grid(input).unwrap();
 
     let mut memo = HashMap::new();
-    let mut solves= HashMap::new();
+    let mut solves = HashMap::new();
     let mut i = 0usize;
 
     let mut bound: Option<usize> = None;
@@ -83,7 +83,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         tilt_up(&mut grid);
         grid.rotate_right();
 
-                solves.insert(i, damages(&grid));
+        solves.insert(i, damages(&grid));
 
         let v: String = grid.iter().collect();
         let memo_entry = memo.entry(v).or_insert(vec![]);
