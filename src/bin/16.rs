@@ -1,5 +1,5 @@
-use std::collections::{HashSet};
 use itertools::Itertools;
+use bit_set::BitSet;
 use rayon::prelude::*;
 use advent_of_code::custom_grid::{CustomGrid, input_to_grid};
 use crate::Direction::{Left, Right, Up, Down};
@@ -13,22 +13,35 @@ enum Direction {
     Left,
 }
 
-fn solve(grid: &CustomGrid<char>, start: ((usize, usize), Direction)) -> u32 {
-    let mut energized_beams: HashSet<((usize, usize), Direction)> = HashSet::new();
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+struct PosDir {
+    position: (usize, usize),
+    direction: Direction,
+}
 
-    let mut next_stack: Vec<_> = vec![start ];
+impl Into<usize> for PosDir {
+    fn into(self) -> usize {
+        return (self.position.0 << 16) + (self.position.1 << 2) + self.direction as usize;
+    }
+}
+
+fn solve(grid: &CustomGrid<char>, start: PosDir) -> u32 {
+    let mut energized_beams: BitSet = BitSet::new();
+
+    let mut next_stack: Vec<_> = vec![start];
 
     while let Some(current) = next_stack.pop() {
-        if energized_beams.contains(&current) {
+        if energized_beams.contains(current.into()) {
             continue;
         }
 
-        let ((row, col), direction) = current;
+        let (row, col) = current.position;
+        let direction = current.direction;
 
         match grid.get(row, col) {
             None => continue,
             Some(c) => {
-                energized_beams.insert(current);
+                energized_beams.insert(current.into());
                 let mut next_directions = vec![];
                 match (c, direction) {
                     ('.', _) => next_directions.push(direction),
@@ -53,26 +66,38 @@ fn solve(grid: &CustomGrid<char>, start: ((usize, usize), Direction)) -> u32 {
                     _ => unimplemented!()
                 };
 
-                for next_direction in next_directions.into_iter() {
+                for next_direction in next_directions.iter() {
                     match next_direction {
                         Up => {
                             if row != 0 {
-                                next_stack.push(((row - 1, col), next_direction));
+                                next_stack.push(PosDir {
+                                    position: (row - 1, col),
+                                    direction: *next_direction,
+                                });
                             }
                         }
                         Down => {
                             if row != grid.rows() - 1 {
-                                next_stack.push(((row + 1, col), next_direction));
+                                next_stack.push(PosDir {
+                                    position: (row + 1, col),
+                                    direction: *next_direction,
+                                });
                             }
                         }
                         Right => {
                             if col != grid.cols() - 1 {
-                                next_stack.push(((row, col + 1), next_direction));
+                                next_stack.push(PosDir {
+                                    position: (row, col + 1),
+                                    direction: *next_direction,
+                                });
                             }
                         }
                         Left => {
                             if col != 0 {
-                                next_stack.push(((row, col - 1), next_direction));
+                                next_stack.push(PosDir {
+                                    position: (row, col - 1),
+                                    direction: *next_direction,
+                                });
                             }
                         }
                     }
@@ -81,13 +106,16 @@ fn solve(grid: &CustomGrid<char>, start: ((usize, usize), Direction)) -> u32 {
         }
     }
 
-    energized_beams.iter().unique_by(|(pos, _)| pos).count() as u32
+    energized_beams.iter().unique_by(|pos| pos >> 2).count() as u32
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
     let grid: CustomGrid<char> = input_to_grid(input).unwrap();
 
-    Some(solve(&grid, ((0usize, 0usize), Right)))
+    Some(solve(&grid, PosDir{
+        direction: Right,
+        position: (0, 0)
+    }))
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
@@ -96,13 +124,25 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mut possible_starts = vec![];
 
     for i in 0..grid.rows() {
-        possible_starts.push(((i, 0), Right));
-        possible_starts.push(((i, grid.cols() - 1), Left));
+        possible_starts.push(PosDir {
+            position: (i, 0),
+            direction: Right
+        });
+        possible_starts.push(PosDir {
+            position: (i, grid.cols() - 1),
+            direction: Left
+        });
     }
 
     for i in 0..grid.cols() {
-        possible_starts.push(((0, i), Down));
-        possible_starts.push(((grid.rows() - 1, i), Up));
+        possible_starts.push(PosDir {
+            position: (0, i),
+            direction: Down
+        });
+        possible_starts.push(PosDir {
+            position: (grid.rows() - 1, i),
+            direction: Up
+        });
     }
 
     Some(
