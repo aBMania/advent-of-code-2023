@@ -4,6 +4,27 @@ use std::hash::{Hash, Hasher};
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum Direction {
+    Up,
+    Down,
+    Right,
+    Left,
+}
+
+impl Direction {
+    pub fn from_rdlu(rdlu: char) -> Result<Direction, ()> {
+        match rdlu {
+            'R' => Ok(Direction::Right),
+            'D' => Ok(Direction::Down),
+            'L' => Ok(Direction::Left),
+            'U' => Ok(Direction::Up),
+            _ => Err(())
+        }
+    }
+}
+
 #[derive(Eq, PartialEq, Clone)]
 #[repr(transparent)]
 pub struct CustomGrid<T: Eq + Hash>(Grid<T>);
@@ -43,6 +64,10 @@ impl<T: Display + Eq + Hash> Debug for CustomGrid<T> {
 }
 
 impl<T: Eq + Hash> CustomGrid<T> {
+
+    pub fn from_grid(grid: Grid<T>) -> Self {
+        CustomGrid(grid)
+    }
     pub fn iter_neighbors(
         &self,
         row: usize,
@@ -91,6 +116,24 @@ impl<T: Eq + Hash> CustomGrid<T> {
                     .map(|val| ((row as usize, col as usize), val))
             }
         })
+    }
+
+    pub fn direction(&self, row: usize, col: usize, direction: Direction) -> Option<((usize, usize), &T)> {
+        match direction {
+            Direction::Up => self.up_indexed(row, col),
+            Direction::Down => self.down_indexed(row, col),
+            Direction::Right => self.right_indexed(row, col),
+            Direction::Left => self.left_indexed(row, col),
+        }
+    }
+
+    pub fn direction_indexed(&self, row: usize, col: usize, direction: Direction) -> Option<&T> {
+        match direction {
+            Direction::Up => self.up(row, col),
+            Direction::Down => self.down(row, col),
+            Direction::Right => self.right(row, col),
+            Direction::Left => self.left(row, col),
+        }
     }
 
     pub fn right(&self, row: usize, col: usize) -> Option<&T> {
