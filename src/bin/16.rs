@@ -21,7 +21,7 @@ struct PosDir {
 
 impl Into<usize> for PosDir {
     fn into(self) -> usize {
-        return (self.position.0 << 16) + (self.position.1 << 2) + self.direction as usize;
+        (self.position.0 << 16) + (self.position.1 << 2) + self.direction as usize
     }
 }
 

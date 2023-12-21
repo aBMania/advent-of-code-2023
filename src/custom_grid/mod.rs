@@ -29,6 +29,26 @@ impl Direction {
 #[repr(transparent)]
 pub struct CustomGrid<T: Eq + Hash>(Grid<T>);
 
+impl<T> FromStr for CustomGrid<T>
+    where
+        T: Eq + Hash + FromStr
+{
+    type Err = <T as FromStr>::Err;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let lines: Vec<&str> = s.lines().map(|line| line.trim()).collect();
+        let cols = lines[0].len();
+
+        let grid_data: Result<Vec<T>, <T as FromStr>::Err> = lines
+            .into_iter()
+            .flat_map(|line| line.chars())
+            .map(|c| c.to_string().parse::<T>())
+            .collect();
+
+        Ok(CustomGrid(Grid::from_vec(grid_data?, cols)))
+    }
+}
+
 impl<T: Eq + Hash> Hash for CustomGrid<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         for x in self.0.iter() {
@@ -67,6 +87,10 @@ impl<T: Eq + Hash> CustomGrid<T> {
 
     pub fn from_grid(grid: Grid<T>) -> Self {
         CustomGrid(grid)
+    }
+
+    pub fn is_border(&self, row: usize, col: usize) -> bool {
+        row == 0 || row == self.rows() - 1 || col == 0 || col == self.cols() - 1
     }
     pub fn iter_neighbors(
         &self,

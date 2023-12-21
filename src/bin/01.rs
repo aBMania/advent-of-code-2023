@@ -1,5 +1,6 @@
-use itertools::Itertools;
-use nom::FindSubstring;
+use std::collections::HashMap;
+use lazy_static::lazy_static;
+use rayon::prelude::*;
 advent_of_code::solution!(1);
 
 pub fn part_one(input: &str) -> Option<u32> {
@@ -19,51 +20,40 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(response)
 }
 
-const INT_STRINGS: [&str; 9] = [
-    "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-];
+lazy_static! {
+    static ref CARD_VALUES: HashMap<&'static str, u8> = HashMap::from([
+        ("1", 1),
+        ("2", 2),
+        ("3", 3),
+        ("4", 4),
+        ("5", 5),
+        ("6", 6),
+        ("7", 7),
+        ("8", 8),
+        ("9", 9),
+        ("one", 1),
+        ("two", 2),
+        ("three", 3),
+        ("four", 4),
+        ("five", 5),
+        ("six", 6),
+        ("seven", 7),
+        ("eight", 8),
+        ("nine", 9),
+    ]);
+}
+
 
 pub fn part_two(input: &str) -> Option<u32> {
     let response = input
-        .lines()
-        .map(|mut line| {
-            let mut replaced = true;
+        .par_lines()
+        .map(|line| {
+            let findings: Vec<_> = CARD_VALUES.iter().map(|(s, val)| (*val, line.find(s), line.rfind(s))).filter(|(_, min, _)| min.is_some()).collect();
+            let min = findings.iter().min_by(|(_, min_index, _), (_, other_min_index, _)| min_index.cmp(other_min_index));
+            let max = findings.iter().max_by(|(_, _, max_index), (_, _, other_max_index)| max_index.cmp(other_max_index));
 
-            // Absolute overkill solution
-            // At first, i thought nineight should be understood as 9ight
-            // But actually, it is expected to be 98
-            // Simple adjustment is to replace 9 -> 9e (keeping the last char to be reused later)
-            while replaced {
-                let mut int_substrings_index: Vec<_> = INT_STRINGS
-                    .iter()
-                    .enumerate()
-                    .filter_map(|(index, &int_string)| {
-                        line.find_substring(int_string).map(|i| (i, index))
-                    })
-                    .sorted_by(|(a, _), (b, _)| Ord::cmp(b, a))
-                    .collect();
 
-                if let Some((_, i)) = int_substrings_index.pop() {
-                    // The trick
-                    let last_char = INT_STRINGS[i].chars().last().unwrap();
-
-                    line = &*line
-                        .replacen(INT_STRINGS[i], &format!("{}{}", i + 1, last_char), 1)
-                        .leak();
-                    replaced = true
-                } else {
-                    replaced = false
-                }
-            }
-
-            let numeric_chars: Vec<_> = line.chars().filter(|x| x.is_numeric()).collect();
-            format!(
-                "{}{}",
-                numeric_chars.first().unwrap(),
-                numeric_chars.last().unwrap()
-            )
-            .parse::<u32>()
-            .unwrap()
+            (min.unwrap().0 * 10 + max.unwrap().0) as u32
         })
         .sum();
     Some(response)

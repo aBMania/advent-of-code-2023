@@ -290,7 +290,7 @@ pub fn part_two(input: &str) -> Option<u64> {
     Some(
         values
             .into_iter()
-            .fold(1u64, |acc, cycle| lcm(acc, cycle)),
+            .fold(1u64, lcm),
     )
 }
 
